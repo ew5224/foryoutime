@@ -1,0 +1,48 @@
+from typing import List
+import csv
+import pymysql.cursors
+
+class URLRepository:
+    def __init__(self, file_path: str):
+        self.file_path = file_path
+        self.urls = self.load_urls()
+
+    def load_urls(self) -> List[str]:
+        with open(self.file_path, 'r', newline='') as csv_file:
+            csv_reader = csv.reader(csv_file)
+            read_urls = [url for row in csv_reader for url in row]
+        return read_urls
+
+    def exists(self, url) -> bool:
+        return url in self.urls
+
+
+class MySQLRepository:
+    def __init__(self):
+        self.host = 'exit-database.c9heedqt7ayj.ap-northeast-2.rds.amazonaws.com'
+        self.user = 'admin'
+        self.password = 'fkdls3323'
+        self.database = 'foryoutime'
+        self.connection = self.connect_to_mysql()
+
+    def connect_to_mysql(self):
+        connection = pymysql.connect(
+            host=self.host,
+            user=self.user,
+            password=self.password,
+            database=self.database,
+            cursorclass=pymysql.cursors.DictCursor
+        )
+        return connection
+
+    def get_elasped_time(self, url) -> float :
+        with self.connection.cursor() as cursor:
+            sql = f"SELECT avg(average_time) as elasped_time FROM checked_time WHERE host = '{url}'"
+            print(sql)
+            cursor.execute(sql)
+            result = cursor.fetchone()
+            print(result['elasped_time'])
+        return int(result['elasped_time'] * 100)
+
+
+

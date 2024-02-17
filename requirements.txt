@@ -1,0 +1,10 @@
+requests
+urllib3
+statistics
+pandas==1.5.2
+gspread
+oauth2client
+kivy
+psycopg2-binary
+sqlalchemy
+pymysql

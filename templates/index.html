@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server Time Checker</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Enter URL to check server time:</h1>
+    <input type="text" id="url" required>
+    <button onclick="getServerTime()">Check Time</button>
+    <div id="timeResult"></div>
+
+    <script>
+        function getServerTime() {
+    var url = $("#url").val();
+    $.ajax({
+        type: "POST",
+        url: "test_foryoutime/get_server_time/",
+        data: {url: url},
+        dataType: 'json',
+        success: function(response) {
+             if (response.server_date) {
+                $("#timeResult").append("<p>" + response.server_date + "</p>");
+            } else {
+                $("#timeResult").append("<p>Error: Server date is undefined</p>");
+            }
+        },
+        error: function(xhr, textStatus, errorThrown) {
+            console.log("Error:", errorThrown);
+            $("#timeResult").append("<p>Error: " + errorThrown + "</p>");
+        }
+    });
+}
+    </script>
+</body>
+</html>
