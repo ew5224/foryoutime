@@ -27,7 +27,7 @@ async def get_correction(url: str, es=None):
 @app.get("/server_time/")
 async def get_server_time(url: str):
     parsed_url = parse_url(url)
-    server_time = get_server_time_from_url([parsed_url])
+    server_time = get_server_time_from_url(parsed_url)
     return {"server_time": int(server_time)}
 
 
