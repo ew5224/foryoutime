@@ -21,19 +21,26 @@ def get_correction_from_db(url: str, es) -> int:
 
     if es is None:
         if urlrepository.exists(url):
+            logging.info(f"Case 1 {url}")
             return mysqlrepository.get_elasped_time(url)
-
+        logging.info(f"Case 2 {url}")
         return 150
 
     if urlrepository.exists(url):
+        logging.info(f"Case 3 {url}")
         return (mysqlrepository.get_elasped_time(url) + int(es)) / 2
 
+    logging.info(f"Case 4 {url}")
     return int(es)
 
 
 def parse_url(url: str) -> str:
+    logging.info(url)
     url = re.sub(r'^www\.', '', url)
-    url = re.sub(r'\/.*', '', url)
+    logging.info(url)
+    ## url = re.sub(r'\/.*', '', url)
+    url = url.replace("https://", "").replace("http://","")
+    logging.info(url)
     return url
 
 

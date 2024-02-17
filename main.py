@@ -2,8 +2,9 @@ from fastapi import FastAPI, Request, Form
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import HTMLResponse, JSONResponse
 from starlette.templating import Jinja2Templates
-
+import logging
 from service import get_correction_from_db, parse_url, get_server_time_from_url, get_server_time_from_url_by_string
+logging.basicConfig(level=logging.INFO)
 
 app = FastAPI()
 app.add_middleware(
@@ -20,12 +21,13 @@ templates = Jinja2Templates(directory="templates")
 async def get_correction(url: str, es=None):
     parsed_url = parse_url(url)
     correction = get_correction_from_db(parsed_url, es)
+    logging.info(f"Elasped time : {correction}")
     return {'correction': correction}
-
 
 @app.get("/server_time/")
 async def get_server_time(url: str):
-    server_time = get_server_time_from_url(url)
+    parsed_url = parse_url(url)
+    server_time = get_server_time_from_url([parsed_url])
     return {"server_time": int(server_time)}
 
 
@@ -36,9 +38,8 @@ async def get_modified_server_time(url: str, es=None):
     parsed_url = parse_url(url)
     correction = get_correction_from_db(parsed_url, es)
 
-
     modified_server_time = server_time - correction
-
+    logging.info(f"Elasped time : {correction}")
     return {"server_time": int(modified_server_time)}
 
 @app.get("/test_foryoutime", response_class=HTMLResponse)

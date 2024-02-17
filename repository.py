@@ -1,6 +1,9 @@
 from typing import List
 import csv
 import pymysql.cursors
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 class URLRepository:
     def __init__(self, file_path: str):
@@ -37,12 +40,11 @@ class MySQLRepository:
 
     def get_elasped_time(self, url) -> float :
         with self.connection.cursor() as cursor:
-            sql = f"SELECT avg(average_time) as elasped_time FROM checked_time WHERE host = '{url}'"
+            sql = f"SELECT D as elasped_time FROM grade WHERE host = '{url}'"
             print(sql)
+            logging.info(sql)
             cursor.execute(sql)
             result = cursor.fetchone()
             print(result['elasped_time'])
+            logging.info(result['elasped_time'])
         return int(result['elasped_time'] * 100)
-
-
-
