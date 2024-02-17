@@ -5,6 +5,7 @@ import statistics
 import csv
 import socket
 import pymysql
+from sqlalchemy import create_engine
 
 
 def elasped_time_checker(host_list: list[str], http: urllib3.PoolManager, connection,
@@ -92,6 +93,15 @@ def get_db_connection():
     return connection
 
 
+def get_db_sqlalchemy_connection():
+    user = 'admin'
+    password = 'fkdls3323'
+    host = 'exit-database.c9heedqt7ayj.ap-northeast-2.rds.amazonaws.com'
+    db_name = 'foryoutime'
+    db_port = '3306'
+    engine = create_engine(f'mysql+pymysql://{user}:{password}@{host}/{db_name}')
+    return engine
+
 def save_to_db(connection, values):
     columns = ['checked_datetime', 'host', 'average_time', 'median_time', 'min_time', 'max_time', 'std_dev_time',
                'ip_address']
@@ -136,7 +146,17 @@ def calculate_grade(connection):
             'C': p90,
             'D': p95
         })
+
+        percentile_df.reset_index(inplace=True)
+        percentile_df.rename(columns={'index': 'host'}, inplace=True)
         print(percentile_df)
+        print(percentile_df.columns)
+
+        engine = get_db_sqlalchemy_connection()
+        with engine.connect() as conn, conn.begin():
+
+            # DataFrame을 새로운 테이블로 생성합니다.
+            percentile_df.to_sql(name="grade", con=conn, if_exists='replace')
 
     finally:
         print("Over")
@@ -146,6 +166,5 @@ if __name__ == "__main__":
     db_connection = get_db_connection()
     url_list = read_urls()
     http = urllib3.PoolManager()
-    # elasped_time_checker(url_list, http, db_connection)
-
+    elasped_time_checker(url_list, http, db_connection)
     calculate_grade(db_connection)

@@ -19,6 +19,12 @@ class URLRepository:
     def exists(self, url) -> bool:
         return url in self.urls
 
+    def add_url(self, url: str):
+        with open(self.file_path, 'a', newline='') as csv_file:
+            csv_writer = csv.writer(csv_file)
+            csv_writer.writerow([url])
+        self.urls.append(url)
+
 
 class MySQLRepository:
     def __init__(self):

@@ -48,7 +48,7 @@ def get_server_time_from_url(url: str):
     try:
         response = requests.get(url)
 
-        server_datetime = datetime.strptime(response.headers['Date'], "%a, %d %b %Y %H:%M:%S %Z") + timedelta(hours=9)
+        server_datetime = datetime.strptime(response.headers['Date'], "%a, %d %b %Y %H:%M:%S %Z")
         server_timestamp = server_datetime.timestamp() * 1000
         return server_timestamp
 
@@ -60,7 +60,7 @@ def get_server_time_from_url_by_string(url: str):
     try:
         response = requests.get(url)
         server_date = response.headers['Date']
-        server_datetime = datetime.strptime(server_date, "%a, %d %b %Y %H:%M:%S %Z") + timedelta(hours=9)
+        server_datetime = datetime.strptime(server_date, "%a, %d %b %Y %H:%M:%S %Z")
         server_time_string = server_datetime.strftime("%Y년 %m월 %d일 %H시 %M분 %S초")
         return server_time_string
 
