@@ -1,10 +1,19 @@
 from fastapi import FastAPI, Request, Form
+from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import HTMLResponse, JSONResponse
 from starlette.templating import Jinja2Templates
 
 from service import get_correction_from_db, parse_url, get_server_time_from_url, get_server_time_from_url_by_string
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 templates = Jinja2Templates(directory="templates")
 
 @app.get("/correction/")
