@@ -168,3 +168,4 @@ if __name__ == "__main__":
     http = urllib3.PoolManager()
     elasped_time_checker(url_list, http, db_connection)
     calculate_grade(db_connection)
+    db_connection.close()
