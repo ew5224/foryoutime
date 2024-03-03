@@ -1,29 +1,7 @@
-from typing import List
-import csv
 import pymysql.cursors
 import logging
 
 logging.basicConfig(level=logging.INFO)
-
-class URLRepository:
-    def __init__(self, file_path: str):
-        self.file_path = file_path
-        self.urls = self.load_urls()
-
-    def load_urls(self) -> List[str]:
-        with open(self.file_path, 'r', newline='') as csv_file:
-            csv_reader = csv.reader(csv_file)
-            read_urls = [url for row in csv_reader for url in row]
-        return read_urls
-
-    def exists(self, url) -> bool:
-        return url in self.urls
-
-    def add_url(self, url: str):
-        with open(self.file_path, 'a', newline='') as csv_file:
-            csv_writer = csv.writer(csv_file)
-            csv_writer.writerow([url])
-        self.urls.append(url)
 
 
 class MySQLRepository:
@@ -33,6 +11,7 @@ class MySQLRepository:
         self.password = 'fkdls3323'
         self.database = 'foryoutime'
         self.connection = self.connect_to_mysql()
+        self.url_cache = self.load_url_cache()
 
     def connect_to_mysql(self):
         connection = pymysql.connect(
@@ -44,13 +23,54 @@ class MySQLRepository:
         )
         return connection
 
-    def get_elasped_time(self, url) -> float :
+    def get_elasped_time(self, url) -> float:
         with self.connection.cursor() as cursor:
             sql = f"SELECT D as elasped_time FROM grade WHERE host = '{url}'"
             print(sql)
             logging.info(sql)
             cursor.execute(sql)
             result = cursor.fetchone()
+            ## TODO : if elasped time on db is None ?
             print(result['elasped_time'])
             logging.info(result['elasped_time'])
         return int(result['elasped_time'] * 100)
+
+    def load_url_cache(self):
+        url_cache = set()
+        try:
+            with self.connection.cursor() as cursor:
+                sql = "SELECT url FROM urls"
+                cursor.execute(sql)
+                result = cursor.fetchall()
+                for row in result:
+                    url_cache.add(row['url'])
+        except Exception as e:
+            logging.error(f"Error loading URL cache: {str(e)}")
+            raise
+        return url_cache
+
+    def exists_url(self, url: str) -> bool:
+        return url in self.url_cache
+
+    def add_url(self, url: str) -> None:
+        try:
+            with self.connection.cursor() as cursor:
+                sql = f"INSERT INTO urls (url) VALUES ('{url}')"
+                logging.info(sql)
+                cursor.execute(sql)
+            self.connection.commit()
+            self.url_cache.add(url)  # 새로운 URL을 캐시에 추가
+        except Exception as e:
+            logging.error(f"Error adding URL to database: {str(e)}")
+            raise
+
+    def get_all_urls(self) -> list:
+        try:
+            with self.connection.cursor() as cursor:
+                sql = "SELECT url FROM urls"
+                cursor.execute(sql)
+                result = cursor.fetchall()
+                return [row['url'] for row in result]
+        except Exception as e:
+            logging.error(f"Error fetching all URLs from database: {str(e)}")
+            raise

@@ -6,17 +6,29 @@ import csv
 import socket
 import pymysql
 from sqlalchemy import create_engine
+from service import parse_url
 
+from repository import MySQLRepository
+from urllib.parse import urlparse, urlunparse
+
+
+def parse_url_for_scrape(url: str) -> str:
+
+    parsed_url = url.replace("http://", "").replace("https://", "")
+
+    return parsed_url
 
 def elasped_time_checker(host_list: list[str], http: urllib3.PoolManager, connection,
                          test_num: int = 10) -> pd.DataFrame:
     current_time = time.strftime('%Y-%m-%d %H:%M:%S')
 
     for host in host_list:
+        parsed_host = parse_url_for_scrape(host)
+
         elapsed_times = []
         status_codes = {}
         try:
-            ip_address = socket.gethostbyname(host)
+            ip_address = socket.gethostbyname(parsed_host)
         except Exception as e:
             ip_address = "None"
             print(e)
@@ -64,17 +76,6 @@ def elasped_time_checker(host_list: list[str], http: urllib3.PoolManager, connec
             save_to_fail_log(connection, [current_time, host])
             print(f"Fail to scrape data \n {e}")
 
-
-def read_urls():
-    # CSV 파일 경로
-    csv_file_path = 'url_list.csv'
-
-    # CSV 파일 읽어오기
-    with open(csv_file_path, 'r', newline='') as csv_file:
-        csv_reader = csv.reader(csv_file)
-        read_urls = [url for row in csv_reader for url in row]
-
-    return read_urls
 
 
 def get_db_connection():
@@ -164,7 +165,9 @@ def calculate_grade(connection):
 
 if __name__ == "__main__":
     db_connection = get_db_connection()
-    url_list = read_urls()
+    mysqlrepository = MySQLRepository()
+
+    url_list = mysqlrepository.get_all_urls()
     http = urllib3.PoolManager()
     elasped_time_checker(url_list, http, db_connection)
     calculate_grade(db_connection)

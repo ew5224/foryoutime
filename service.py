@@ -1,49 +1,44 @@
-"""
-Logic 1.f
-    return 150 url does not exists
-
-    return url 가장 가까운 시간
-"""
-from repository import URLRepository, MySQLRepository
+from repository import MySQLRepository
 from fastapi import HTTPException
 import requests
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 import time
 from urllib.parse import urlparse, urlunparse
 from constant import Parameter
 
-urlrepository = URLRepository('url_list.csv')
 mysqlrepository = MySQLRepository()
 logging.basicConfig(level=logging.INFO)
 
 
 def get_correction_from_db(url: str, es) -> int:
-    global urlrepository
     global mysqlrepository
 
     if es is None:
-        if urlrepository.exists(url):
+        if mysqlrepository.exists_url(url):
             logging.info(f"Case 1 {url}")
             return mysqlrepository.get_elasped_time(url)
         logging.info(f"Case 2 {url}")
+        mysqlrepository.add_url(url)
         return 150
 
-    if urlrepository.exists(url):
+    if mysqlrepository.exists_url(url):
         logging.info(f"Case 3 {url}")
         return (mysqlrepository.get_elasped_time(url) + int(es)) / 2
 
+    mysqlrepository.add_url(url)
     logging.info(f"Case 4 {url}")
     return int(es)
 
-
+## TODO : 어떤 양식의 url이 들어오든 하나의 url로 통일되도록 - DB와 sync
 def parse_url(url: str) -> str:
+
     parsed_url = urlparse(url)
-
-    if not parsed_url.scheme:
-        parsed_url = parsed_url._replace(scheme='http', query='', params='', fragment='')
-
-    return urlunparse(parsed_url)
+    if not parsed_url.scheme :
+        updated_url = parsed_url._replace(scheme='https', query='', params='', fragment='')
+    else :
+        updated_url = parsed_url._replace(query='', params='', fragment='')
+    return urlunparse(updated_url)
 
 
 """
