@@ -3,8 +3,7 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import HTMLResponse, JSONResponse
 from starlette.templating import Jinja2Templates
 import logging
-from service import get_correction_from_db, parse_url, get_server_time_from_url, get_server_time_from_url_by_string, \
-    estimate_millisecond_discrepancy
+from service import get_correction_from_db, parse_url, get_server_time_from_url, estimate_millisecond_discrepancy
 
 logging.basicConfig(level=logging.INFO)
 
@@ -30,18 +29,20 @@ async def get_correction(url: str, es=None):
 
 @app.get("/server_time/")
 async def get_server_time(url: str):
-    server_time = get_server_time_from_url(url)
+    parsed_url = parse_url(url)
+    server_time = get_server_time_from_url(parsed_url, return_type="timestamp")
     return {"server_time": int(server_time)}
 
 
 @app.get("/modified_server_time/")
 async def get_modified_server_time(url: str, es=None, mill=False):
-    if mill:
-        server_time = estimate_millisecond_discrepancy(url, num_requests=20)
-    else :
-        server_time = get_server_time_from_url(url)
-
     parsed_url = parse_url(url)
+
+    if mill:
+        server_time = estimate_millisecond_discrepancy(parsed_url, num_requests=20)
+    else :
+        server_time = get_server_time_from_url(parsed_url, return_type="timestamp")
+
     correction = get_correction_from_db(parsed_url, es)
 
     modified_server_time = server_time - correction
@@ -57,7 +58,7 @@ async def read_root(request: Request):
 @app.post("/test_foryoutime/get_server_time/", response_class=JSONResponse)  # JSON 형식의 응답을 반환하도록 수정
 async def get_server_time(request: Request, url: str = Form(...)):
     try:
-        result = get_server_time_from_url_by_string(url)
+        result = get_server_time_from_url(url, return_type="korea_string")
         return {"server_date": result}
 
     except Exception as e:
