@@ -1,4 +1,5 @@
-class Parameter :
+class Parameter:
     DEFAULT = 150
 
     SYNC_ZERO_MILLI_ERROR = 0.3
+    SYNC_ZERO_MILLI_TRIAL = 20

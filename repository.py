@@ -30,7 +30,8 @@ class MySQLRepository:
             logging.info(sql)
             cursor.execute(sql)
             result = cursor.fetchone()
-            ## TODO : if elasped time on db is None ?
+            if result is None :
+                return 150
             print(result['elasped_time'])
             logging.info(result['elasped_time'])
         return int(result['elasped_time'] * 100)

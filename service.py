@@ -30,13 +30,13 @@ def get_correction_from_db(url: str, es) -> int:
     logging.info(f"Case 4 {url}")
     return int(es)
 
-## TODO : 어떤 양식의 url이 들어오든 하나의 url로 통일되도록 - DB와 sync
-def parse_url(url: str) -> str:
 
+def parse_url(url: str) -> str:
     parsed_url = urlparse(url)
-    if not parsed_url.scheme :
-        updated_url = parsed_url._replace(scheme='https', query='', params='', fragment='')
-    else :
+    if not parsed_url.scheme:
+        updated_url = parsed_url._replace(scheme='https', netloc=parsed_url.path, path='', query='', params='', fragment='')
+        print(updated_url)
+    else:
         updated_url = parsed_url._replace(query='', params='', fragment='')
     return urlunparse(updated_url)
 
@@ -76,8 +76,7 @@ def get_server_time_from_url(url: str, return_type):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-
-def estimate_millisecond_discrepancy(url, num_requests=10):
+def estimate_millisecond_discrepancy(url, num_requests=Parameter.SYNC_ZERO_MILLI_TRIAL):
     previous_second = None
     for _ in range(num_requests):
         elasped_time, server_time = get_server_time_from_url(url, return_type="string")
@@ -95,6 +94,8 @@ def estimate_millisecond_discrepancy(url, num_requests=10):
                     return convert_to_timestamp(server_time, elasped_time)
 
             previous_second = current_second
+    ## if Fail to get estimate_millsecond
+    raise HTTPException(500, "Fail to get estimated millisecond")
 
 
 def convert_to_timestamp(date_string, milliseconds):
