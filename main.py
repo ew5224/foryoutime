@@ -20,9 +20,9 @@ templates = Jinja2Templates(directory="templates")
 
 
 @app.get("/correction/")
-async def get_correction(url: str, es=None):
+async def get_correction(url: str, et=None):
     parsed_url = parse_url(url)
-    correction = get_correction_from_db(parsed_url, es)
+    correction = get_correction_from_db(parsed_url, et)
     logging.info(f"Elasped time : {correction}")
     return {'correction': correction}
 
@@ -35,7 +35,7 @@ async def get_server_time(url: str):
 
 
 @app.get("/modified_server_time/")
-async def get_modified_server_time(url: str, es=None, mill=False):
+async def get_modified_server_time(url: str, et=None, mill=False):
     parsed_url = parse_url(url)
 
     if mill:
@@ -43,7 +43,7 @@ async def get_modified_server_time(url: str, es=None, mill=False):
     else:
         server_time = get_server_time_from_url(parsed_url, return_type="timestamp")
 
-    correction = get_correction_from_db(parsed_url, es)
+    correction = get_correction_from_db(parsed_url, et)
 
     modified_server_time = server_time - correction
     logging.info(f"Server time : {server_time} Correction : {correction} Modified Server time : {modified_server_time}")
