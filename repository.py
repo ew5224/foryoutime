@@ -75,3 +75,6 @@ class MySQLRepository:
         except Exception as e:
             logging.error(f"Error fetching all URLs from database: {str(e)}")
             raise
+
+    def close(self):
+        self.connection.close()

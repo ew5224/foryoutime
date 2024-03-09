@@ -172,3 +172,4 @@ if __name__ == "__main__":
     elasped_time_checker(url_list, http, db_connection)
     calculate_grade(db_connection)
     db_connection.close()
+    mysqlrepository.close()

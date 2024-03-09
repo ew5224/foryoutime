@@ -40,7 +40,7 @@ async def get_modified_server_time(url: str, es=None, mill=False):
 
     if mill:
         server_time = estimate_millisecond_discrepancy(parsed_url, num_requests=20)
-    else :
+    else:
         server_time = get_server_time_from_url(parsed_url, return_type="timestamp")
 
     correction = get_correction_from_db(parsed_url, es)
@@ -64,3 +64,8 @@ async def get_server_time(request: Request, url: str = Form(...)):
     except Exception as e:
         error_message = f"Error: {str(e)}"
         return {"error_message": error_message}
+
+
+@app.get("/")
+async def return_200():
+    return "OK"
