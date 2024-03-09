@@ -35,7 +35,7 @@ async def get_server_time(url: str):
 
 
 @app.get("/modified_server_time/")
-async def get_modified_server_time(response : Response, url: str, et=None, mill=False):
+async def get_modified_server_time(url: str, et=None, mill=False):
     parsed_url = parse_url(url)
 
     if mill:
@@ -46,7 +46,6 @@ async def get_modified_server_time(response : Response, url: str, et=None, mill=
     correction = get_correction_from_db(parsed_url, et)
 
     modified_server_time = server_time - correction
-    response.headers["Access-Control-Allow-Origin"] = "*"
     logging.info(f"Server time : {server_time} Correction : {correction} Modified Server time : {modified_server_time}")
     return {"server_time": int(modified_server_time)}
 
