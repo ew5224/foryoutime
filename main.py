@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request, Form
 from starlette.middleware.cors import CORSMiddleware
-from starlette.responses import HTMLResponse, JSONResponse
+from starlette.responses import HTMLResponse, JSONResponse, Response
 from starlette.templating import Jinja2Templates
 import logging
 from service import get_correction_from_db, parse_url, get_server_time_from_url, estimate_millisecond_discrepancy
@@ -35,7 +35,7 @@ async def get_server_time(url: str):
 
 
 @app.get("/modified_server_time/")
-async def get_modified_server_time(url: str, et=None, mill=False):
+async def get_modified_server_time(response : Response, url: str, et=None, mill=False):
     parsed_url = parse_url(url)
 
     if mill:
@@ -46,6 +46,7 @@ async def get_modified_server_time(url: str, et=None, mill=False):
     correction = get_correction_from_db(parsed_url, et)
 
     modified_server_time = server_time - correction
+    response.headers["Access-Control-Allow-Origin"] = "*"
     logging.info(f"Server time : {server_time} Correction : {correction} Modified Server time : {modified_server_time}")
     return {"server_time": int(modified_server_time)}
 
@@ -67,5 +68,6 @@ async def get_server_time(request: Request, url: str = Form(...)):
 
 
 @app.get("/")
-async def return_200():
+async def return_200(response : Response):
+    response.headers["Access-Control-Allow-Origin"] = "*"
     return "OK"
