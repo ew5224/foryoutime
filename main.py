@@ -47,7 +47,7 @@ async def get_modified_server_time(url: str, et=None, mill=False):
 
     modified_server_time = server_time - correction
     logging.info(f"Server time : {server_time} Correction : {correction} Modified Server time : {modified_server_time}")
-    return {"server_time": int(modified_server_time)}
+    return {"server_time": int(modified_server_time), "correction": int(correction)}
 
 
 @app.get("/test_foryoutime", response_class=HTMLResponse)
@@ -67,6 +67,6 @@ async def get_server_time(request: Request, url: str = Form(...)):
 
 
 @app.get("/")
-async def return_200(response : Response):
+async def return_200(response: Response):
     response.headers["Access-Control-Allow-Origin"] = "*"
     return "OK"
