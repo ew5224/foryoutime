@@ -23,7 +23,16 @@ class MySQLRepository:
         )
         return connection
 
+    def get_connection(self):
+        try:
+            self.connection.ping(reconnect=True) # Check if the connection is alive, reconnect if not
+        except (AttributeError, pymysql.OperationalError):
+            # If the connection is not established or has been closed, reconnect
+            self.connection = self.connect_to_mysql()
+
+
     def get_elasped_time(self, url) -> float:
+        self.get_connection()
         with self.connection.cursor() as cursor:
             sql = f"SELECT D as elasped_time FROM grade WHERE host = '{url}'"
             print(sql)
@@ -34,11 +43,12 @@ class MySQLRepository:
                 return 150
             print(result['elasped_time'])
             logging.info(result['elasped_time'])
-        return int(result['elasped_time'] * 100)
+        return int(result['elasped_time'] * 1000)
 
     def load_url_cache(self):
         url_cache = set()
         try:
+            self.get_connection()
             with self.connection.cursor() as cursor:
                 sql = "SELECT url FROM urls"
                 cursor.execute(sql)
@@ -55,6 +65,7 @@ class MySQLRepository:
 
     def add_url(self, url: str) -> None:
         try:
+            self.get_connection()
             with self.connection.cursor() as cursor:
                 sql = f"INSERT INTO urls (url) VALUES ('{url}')"
                 logging.info(sql)
@@ -67,6 +78,7 @@ class MySQLRepository:
 
     def get_all_urls(self) -> list:
         try:
+            self.get_connection()
             with self.connection.cursor() as cursor:
                 sql = "SELECT url FROM urls"
                 cursor.execute(sql)
