@@ -32,12 +32,14 @@ def get_correction_from_db(url: str, es) -> int:
 
 
 def parse_url(url: str) -> str:
+    if "auction.co.kr" in url :
+        return "https://auction.co.kr/?redirect=1"
     parsed_url = urlparse(url)
     if not parsed_url.scheme:
         updated_url = parsed_url._replace(scheme='https', netloc=parsed_url.path, path='', query='', params='', fragment='')
         print(updated_url)
     else:
-        updated_url = parsed_url._replace(query='', params='', fragment='')
+        updated_url = parsed_url._replace(scheme='https', query='', params='', fragment='')
     return urlunparse(updated_url)
 
 
@@ -51,7 +53,7 @@ def parse_url(url: str) -> str:
 def get_server_time_from_url(url: str, return_type):
     try:
         response = requests.get(url)
-        if response.status_code == 200:
+        if response.status_code != 404:
             server_time = response.headers['Date']
             elasped_time = response.elapsed.total_seconds()
             if return_type == "string":
@@ -78,8 +80,8 @@ def get_server_time_from_url(url: str, return_type):
 
 def estimate_millisecond_discrepancy(url, num_requests=Parameter.SYNC_ZERO_MILLI_TRIAL):
     previous_second = None
-    for _ in range(num_requests):
-        elasped_time, server_time = get_server_time_from_url(url, return_type="string")
+    for i in range(num_requests):
+        elasped_time, server_time = get_server_time_from_url(url + f"?{str(i)}", return_type="string")
         print(f"process time {elasped_time} {server_time}")
 
         if server_time is not None:

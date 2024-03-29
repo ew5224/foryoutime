@@ -39,7 +39,7 @@ async def get_modified_server_time(url: str, et=None, mill=False):
     parsed_url = parse_url(url)
 
     if mill:
-        server_time = estimate_millisecond_discrepancy(parsed_url, num_requests=20)
+        server_time = estimate_millisecond_discrepancy(parsed_url)
     else:
         server_time = get_server_time_from_url(parsed_url, return_type="timestamp")
 
