@@ -71,11 +71,12 @@ def get_server_time_from_url(url: str, return_type):
             else:
                 raise Exception("wrong type")
         else:
-            print("Failed to retrieve server time. Status code:", response.status_code)
-            return None, None
+            error_message = "입력하신 정보의 URL 주소가 존재하지 않습니다. 다시 확인한 뒤 시도해주세요."
+            raise HTTPException(status_code=500, detail=error_message)
     except Exception as e:
         print("An error occurred:", str(e))
-        raise HTTPException(status_code=400, detail=str(e))
+        error_message = "입력하신 URL 서버에 응답을 받을 수 없습니다."
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 def estimate_millisecond_discrepancy(url, num_requests=Parameter.SYNC_ZERO_MILLI_TRIAL):
@@ -97,7 +98,7 @@ def estimate_millisecond_discrepancy(url, num_requests=Parameter.SYNC_ZERO_MILLI
 
             previous_second = current_second
     ## if Fail to get estimate_millsecond
-    raise HTTPException(500, "Fail to get estimated millisecond")
+    raise HTTPException(500, "입력하신 정보의 서버의 응답이 원활하지 않아 밀리초 지원이 불가능합니다. 밀리초 보기를 해제해주세요.")
 
 
 def convert_to_timestamp(date_string, milliseconds):
