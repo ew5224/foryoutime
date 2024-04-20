@@ -53,6 +53,7 @@ def parse_url(url: str) -> str:
 def get_server_time_from_url(url: str, return_type):
     try:
         response = requests.get(url)
+        response.raise_for_status()
         if response.status_code != 404:
             server_time = response.headers['Date']
             elasped_time = response.elapsed.total_seconds()
@@ -73,6 +74,10 @@ def get_server_time_from_url(url: str, return_type):
         else:
             error_message = "입력하신 정보의 URL 주소가 존재하지 않습니다. 다시 확인한 뒤 시도해주세요."
             raise HTTPException(status_code=500, detail=error_message)
+    except requests.exceptions.RequestException as e:
+        error_message = "입력하신 URL 서버에 응답을 받을 수 없습니다."
+        raise HTTPException(status_code=500, detail=error_message)
+    
     except Exception as e:
         print("An error occurred:", str(e))
         error_message = "입력하신 URL 서버에 응답을 받을 수 없습니다."
