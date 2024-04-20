@@ -90,6 +90,7 @@ def get_server_time_from_url(url: str, return_type):
     
     except Exception as e:
         print("An error occurred:", str(e))
+        logging.info(str(e))
         error_message = "입력하신 URL 서버에 응답을 받을 수 없습니다."
         raise HTTPException(status_code=500, detail=error_message)
 
