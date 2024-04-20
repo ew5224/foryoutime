@@ -77,12 +77,14 @@ def get_server_time_from_url(url: str, return_type):
         
     except requests.exceptions.RequestException as e:
         error_message = str(e)
+        print(error_message)
         if "Name or service not known" in error_message:
+            
             error_message = "입력하신 정보의 URL 주소가 존재하지 않습니다. 다시 확인한 뒤 시도해주세요."
             raise HTTPException(status_code=500, detail=error_message)
 
         else :
-            error_message = "입력하신 URL 서버에 응답을 받을 수 없습니다.."
+            error_message = "입력하신 URL 서버에 응답을 받을 수 없습니다."
             raise HTTPException(status_code=500, detail=error_message)
     
     except Exception as e:
